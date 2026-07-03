@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>The Table Studio — ระบบสั่งอาหารด้วย QR สำหรับร้านอาหาร</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14152c;
+    --bg-alt:#191b3a;
+    --card:#1f2148;
+    --card-2:#242759;
+    --border:rgba(255,255,255,0.08);
+    --gold:#d9b263;
+    --gold-deep:#b8933f;
+    --teal:#3fc98f;
+    --red:#e2574c;
+    --text:#f3f2f8;
+    --muted:#9b99b6;
+    --paper:#fbf9f3;
+    --ink:#241f10;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Noto Sans Thai','Sarabun',sans-serif;
+    font-weight:400;
+    line-height:1.7;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.display{
+    font-family:'Kanit','Noto Sans Thai',sans-serif;
+    font-weight:700;
+    letter-spacing:0.2px;
+  }
+  .wrap{max-width:1120px; margin:0 auto; padding:0 28px;}
+  a{color:inherit; text-decoration:none;}
+
+  /* background texture */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(217,178,99,0.10), transparent 45%),
+      radial-gradient(circle at 90% 20%, rgba(63,201,143,0.07), transparent 40%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* ===== NAV ===== */
+  header.nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(20,21,44,0.85);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 28px;
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand-mark{
+    width:34px; height:34px; border-radius:9px;
+    background:linear-gradient(135deg, var(--gold), var(--gold-deep));
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px;
+  }
+  .brand-name{font-family:'Kanit',sans-serif; font-size:19px; font-weight:700;}
+  .brand-name span{color:var(--gold);}
+  .nav-cta{
+    background:var(--gold); color:#1a1710; font-weight:600; font-size:14px;
+    padding:9px 20px; border-radius:8px;
+    font-family:'Kanit',sans-serif;
+  }
+
+  /* ===== HERO ===== */
+  .hero{
+    position:relative; z-index:1;
+    padding:78px 0 60px;
+  }
+  .hero-grid{
+    display:grid; grid-template-columns:1.05fr 0.95fr; gap:56px; align-items:center;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(217,178,99,0.12); border:1px solid rgba(217,178,99,0.35);
+    color:var(--gold); font-size:13px; font-weight:600;
+    padding:6px 14px; border-radius:100px; margin-bottom:22px;
+    font-family:'Kanit',sans-serif;
+  }
+  .hero h1{
+    font-size:44px; line-height:1.28; margin-bottom:20px;
+  }
+  .hero h1 em{
+    font-style:normal; color:var(--gold);
+    background:linear-gradient(180deg, transparent 62%, rgba(217,178,99,0.28) 62%);
+  }
+  .hero p.lead{
+    color:var(--muted); font-size:16.5px; max-width:480px; margin-bottom:32px;
+  }
+  .hero-actions{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:34px;}
+  .btn-primary{
+    background:var(--gold); color:#1a1710; font-weight:700;
+    padding:14px 26px; border-radius:10px; font-size:15px;
+    font-family:'Kanit',sans-serif;
+    box-shadow:0 10px 24px -8px rgba(217,178,99,0.55);
+  }
+  .btn-ghost{
+    border:1px solid var(--border); color:var(--text);
+    padding:14px 24px; border-radius:10px; font-size:15px; font-weight:600;
+    font-family:'Kanit',sans-serif;
+  }
+  .hero-stats{display:flex; gap:34px;}
+  .hero-stats div b{
+    display:block; font-family:'Kanit',sans-serif; font-size:24px; color:var(--gold);
+  }
+  .hero-stats div span{font-size:12.5px; color:var(--muted);}
+
+  /* dashboard mock */
+  .mock{
+    background:var(--card); border:1px solid var(--border); border-radius:18px;
+    padding:20px; box-shadow:0 30px 60px -20px rgba(0,0,0,0.6);
+    position:relative;
+  }
+  .mock-topbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;}
+  .mock-title{font-family:'Kanit',sans-serif; font-size:13px; font-weight:600; color:var(--muted);}
+  .mock-dots{display:flex; gap:5px;}
+  .mock-dots i{width:7px; height:7px; border-radius:50%; background:var(--border); display:block;}
+  .mock-stats{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px;}
+  .mock-stat{
+    background:var(--card-2); border-radius:10px; padding:12px;
+    border:1px solid var(--border);
+  }
+  .mock-stat b{display:block; font-family:'Kanit',sans-serif; font-size:17px; color:var(--gold);}
+  .mock-stat span{font-size:10.5px; color:var(--muted);}
+  .mock-qr-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:7px;}
+  .mock-qr{
+    aspect-ratio:1; background:repeating-linear-gradient(45deg, #2a2c56 0 3px, #34366a 3px 6px);
+    border-radius:6px; border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-size:9px; color:var(--muted); font-family:'Kanit',sans-serif;
+  }
+  .mock-caption{margin-top:14px; font-size:11.5px; color:var(--muted); text-align:center;}
+
+  /* ===== SECTION LABEL ===== */
+  .section{padding:70px 0; position:relative; z-index:1;}
+  .section-alt{background:var(--bg-alt); border-top:1px solid var(--border); border-bottom:1px solid var(--border);}
+  .kicker{
+    color:var(--gold); font-family:'Kanit',sans-serif; font-weight:600; font-size:13px;
+    letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px; display:block;
+  }
+  .section h2{font-size:30px; margin-bottom:14px;}
+  .section p.sub{color:var(--muted); max-width:560px; font-size:15.5px;}
+
+  /* pain / features */
+  .pain-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:40px;}
+  .pain-card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:22px 20px;
+  }
+  .pain-card .ic{font-size:22px; margin-bottom:12px; display:block;}
+  .pain-card h3{font-size:16px; margin-bottom:8px;}
+  .pain-card p{font-size:13.5px; color:var(--muted);}
+
+  /* how it works */
+  .flow{display:flex; margin-top:44px; gap:0;}
+  .flow-step{flex:1; position:relative; padding-right:18px;}
+  .flow-step .num{
+    font-family:'Kanit',sans-serif; font-weight:800; font-size:13px;
+    color:#1a1710; background:var(--gold); width:28px; height:28px;
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    margin-bottom:14px;
+  }
+  .flow-step h3{font-size:15.5px; margin-bottom:6px;}
+  .flow-step p{font-size:13px; color:var(--muted);}
+  .flow-step:not(:last-child)::after{
+    content:"→"; position:absolute; right:-4px; top:6px; color:var(--border); font-size:18px;
+  }
+
+  /* ===== PRICING (receipt style) ===== */
+  .price-wrap{
+    display:grid; grid-template-columns:1fr 1fr; gap:40px; margin-top:46px;
+    align-items:start;
+  }
+  .receipt{
+    background:var(--paper); color:var(--ink);
+    border-radius:6px 6px 0 0;
+    padding:30px 26px 26px;
+    font-family:'Noto Sans Thai',sans-serif;
+    position:relative;
+    box-shadow:0 24px 50px -18px rgba(0,0,0,0.55);
+  }
+  .receipt::after{
+    content:"";
+    display:block;
+    position:absolute; left:0; right:0; bottom:-13px; height:14px;
+    background:
+      linear-gradient(-45deg, var(--paper) 8px, transparent 0) 0 8px,
+      linear-gradient(45deg, var(--paper) 8px, transparent 0) 0 8px;
+    background-size:16px 16px;
+    background-repeat:repeat-x;
+  }
+  .receipt.featured{
+    background:#fffdf7;
+    outline:2px solid var(--gold);
+    transform:translateY(-10px);
+  }
+  .receipt-badge{
+    position:absolute; top:-13px; right:22px;
+    background:var(--gold); color:#1a1710; font-family:'Kanit',sans-serif;
+    font-weight:700; font-size:11.5px; padding:5px 12px; border-radius:100px;
+  }
+  .receipt h3.store{font-family:'Kanit',sans-serif; font-size:18px; text-align:center; margin-bottom:2px;}
+  .receipt .tagline{text-align:center; font-size:11.5px; color:#7a7460; margin-bottom:16px;}
+  .receipt hr{border:none; border-top:1px dashed #cfc7ac; margin:14px 0;}
+  .receipt-price{text-align:center; margin:6px 0 4px;}
+  .receipt-price .amt{font-family:'Kanit',sans-serif; font-weight:800; font-size:38px;}
+  .receipt-price .per{font-size:12px; color:#7a7460;}
+  .receipt-line{
+    display:flex; justify-content:space-between; font-size:13.5px;
+    padding:7px 0; border-bottom:1px dotted #ddd6bf;
+  }
+  .receipt-line span:first-child{display:flex; gap:8px; align-items:flex-start;}
+  .receipt-line .chk{color:#2f8f5b; font-weight:700;}
+  .receipt-total{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:'Kanit',sans-serif; font-weight:700; font-size:15px;
+    margin-top:14px; padding-top:12px; border-top:1px solid #ccc4a8;
+  }
+  .receipt-cta{
+    display:block; text-align:center; margin-top:18px;
+    background:#1a1c2e; color:#fff; font-family:'Kanit',sans-serif; font-weight:600;
+    padding:12px; border-radius:8px; font-size:14px;
+  }
+  .receipt.featured .receipt-cta{background:var(--gold); color:#1a1710;}
+  .receipt-foot{text-align:center; font-size:11px; color:#a29c85; margin-top:10px;}
+
+  /* CTA band */
+  .cta-band{
+    background:linear-gradient(120deg, #201f4c, #171833);
+    border:1px solid var(--border);
+    border-radius:20px; padding:52px 44px; text-align:center;
+    margin:20px 0 0;
+  }
+  .cta-band h2{font-size:27px; margin-bottom:12px;}
+  .cta-band p{color:var(--muted); margin-bottom:26px; font-size:15px;}
+  .cta-row{display:flex; gap:14px; justify-content:center; flex-wrap:wrap;}
+  .contact-note{
+    margin-top:22px; font-size:12.5px; color:var(--muted);
+  }
+  .contact-note b{color:var(--gold);}
+
+  footer{
+    text-align:center; padding:30px 20px 40px; color:var(--muted); font-size:12.5px;
+    position:relative; z-index:1;
+  }
+
+  @media (max-width:860px){
+    .hero-grid{grid-template-columns:1fr;}
+    .pain-grid{grid-template-columns:repeat(2,1fr);}
+    .flow{flex-wrap:wrap; gap:26px;}
+    .flow-step{flex:1 1 40%;}
+    .flow-step::after{display:none;}
+    .price-wrap{grid-template-columns:1fr;}
+    .receipt.featured{transform:none;}
+    .hero h1{font-size:32px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <div class="brand-mark">🍽️</div>
+      <div class="brand-name">The <span>Table</span> Studio</div>
+    </div>
+    <a href="#pricing" class="nav-cta">ดูราคา</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">✨ ระบบจัดการร้านอาหารครบวงจร</span>
+      <h1>ให้ลูกค้าสั่งเอง สแกนแล้วสั่งได้ทันที<br><em>ไม่ต้องรอเวลาลูกค้าเรียก</em></h1>
+      <p class="lead">ระบบสั่งอาหารด้วย QR โต๊ะ พร้อมหน้าจอครัวเรียลไทม์ ระบบแคชเชียร์คิดเงิน และรายงานยอดขาย ครบในโปรแกรมเดียว ตั้งค่าเสร็จใช้งานได้ภายในวันเดียว</p>
+      <div class="hero-actions">
+        <a href="#pricing" class="btn-primary">เริ่มต้นใช้งานร้านผม/ร้านฉัน</a>
+        <a href="#how" class="btn-ghost">ดูวิธีการทำงาน</a>
+      </div>
+      <div class="hero-stats">
+        <div><b>10 วิ</b><span>เวลาเฉลี่ยที่ลูกค้าใช้สั่งอาหาร</span></div>
+        <div><b>0 บาท</b><span>ค่าคอมมิชชั่นต่อออเดอร์</span></div>
+        <div><b>Real-time</b><span>ออเดอร์เข้าครัวทันที</span></div>
+      </div>
+    </div>
+
+    <div class="mock">
+      <div class="mock-topbar">
+        <div class="mock-title">รายงานยอดขาย · The Table Studio</div>
+        <div class="mock-dots"><i></i><i></i><i></i></div>
+      </div>
+      <div class="mock-stats">
+        <div class="mock-stat"><b>฿11,415</b><span>ยอดขายรวม</span></div>
+        <div class="mock-stat"><b>122</b><span>จำนวนออเดอร์</span></div>
+        <div class="mock-stat"><b>9</b><span>จำนวนโต๊ะ</span></div>
+      </div>
+      <div class="mock-qr-grid">
+        <div class="mock-qr">โต๊ะ1</div><div class="mock-qr">โต๊ะ2</div><div class="mock-qr">โต๊ะ3</div><div class="mock-qr">โต๊ะ4</div><div class="mock-qr">โต๊ะ5</div>
+      </div>
+      <div class="mock-caption">สแกน QR ที่โต๊ะ → สั่งอาหาร → เข้าครัวทันที</div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="wrap">
+    <span class="kicker">ปัญหาที่ร้านอาหารเจอทุกวัน</span>
+    <h2>พนักงานไม่พอ ลูกค้าต้องรอเรียก ออเดอร์หายบ่อย</h2>
+    <p class="sub">The Table Studio แก้ทุกจุดที่ทำให้ร้านช้าและเสียยอดขาย ด้วยระบบเดียวที่เชื่อมทุกจุดของร้านเข้าด้วยกัน</p>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <span class="ic">📱</span>
+        <h3>QR สั่งอาหารที่โต๊ะ</h3>
+        <p>ลูกค้าสแกนแล้วสั่งเองได้เลย เลือกเมนู ระบุจำนวน เพิ่มหมายเหตุ ส่งเข้าครัวโดยไม่ต้องเรียกพนักงาน</p>
+      </div>
+      <div class="pain-card">
+        <span class="ic">👨‍🍳</span>
+        <h3>หน้าจอครัวเรียลไทม์</h3>
+        <p>ออเดอร์ขึ้นหน้าจอครัวทันทีที่ลูกค้ากดส่ง กดรับออเดอร์และกดทำเสร็จแล้วได้ในคลิกเดียว</p>
+      </div>
+      <div class="pain-card">
+        <span class="ic">💳</span>
+        <h3>แคชเชียร์คิดเงินไว</h3>
+        <p>รวมบิลตามโต๊ะอัตโนมัติ รองรับทั้งเงินสดและ QR PromptPay พร้อมพิมพ์ใบเสร็จให้ลูกค้า</p>
+      </div>
+      <div class="pain-card">
+        <span class="ic">📊</span>
+        <h3>รายงานยอดขายเจ้าของร้าน</h3>
+        <p>ดูยอดขายรายวัน เมนูขายดี Top 10 และสัดส่วนยอดขาย ช่วยตัดสินใจสั่งของและวางแผนโปรได้แม่นขึ้น</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="how">
+  <div class="wrap">
+    <span class="kicker">วิธีการทำงาน</span>
+    <h2>5 ขั้นตอน จากสั่งอาหารถึงปิดยอด</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="num">1</div>
+        <h3>ลูกค้าสแกน QR</h3>
+        <p>เปิดเมนูของร้านผ่านมือถือตัวเอง ไม่ต้องโหลดแอป</p>
+      </div>
+      <div class="flow-step">
+        <div class="num">2</div>
+        <h3>เลือกเมนู สั่งอาหาร</h3>
+        <p>เลือกจำนวน ใส่หมายเหตุ กดยืนยันออเดอร์</p>
+      </div>
+      <div class="flow-step">
+        <div class="num">3</div>
+        <h3>ครัวรับออเดอร์</h3>
+        <p>ออเดอร์ขึ้นจอครัวทันที กดรับและกดทำเสร็จแล้ว</p>
+      </div>
+      <div class="flow-step">
+        <div class="num">4</div>
+        <h3>แคชเชียร์คิดเงิน</h3>
+        <p>รวมบิลตามโต๊ะ เลือกช่องทางชำระ พิมพ์ใบเสร็จ</p>
+      </div>
+      <div class="flow-step">
+        <div class="num">5</div>
+        <h3>เจ้าของร้านดูรายงาน</h3>
+        <p>สรุปยอดขาย เมนูขายดี พร้อมกราฟรายวัน</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt" id="pricing">
+  <div class="wrap">
+    <span class="kicker">แพ็กเกจราคา</span>
+    <h2>เลือกแพ็กเกจที่เหมาะกับร้านของคุณ</h2>
+    <p class="sub">จ่ายครั้งเดียว ใช้งานได้ยาว ไม่มีค่าคอมมิชชั่นต่อออเดอร์ อัปเกรดแพ็กเกจได้ทุกเมื่อ</p>
+
+    <div class="price-wrap">
+
+      <div class="receipt">
+        <h3 class="store">STARTER</h3>
+        <div class="tagline">เหมาะกับร้านเปิดใหม่ / ร้านขนาดเล็ก</div>
+        <hr>
+        <div class="receipt-price">
+          <div class="amt">฿2,590</div>
+          <div class="per">จ่ายครั้งเดียว</div>
+        </div>
+        <hr>
+        <div class="receipt-line"><span><span class="chk">✓</span> เมนูอาหาร/เครื่องดื่ม</span><span>15 รายการ</span></div>
+        <div class="receipt-line"><span><span class="chk">✓</span> สร้าง QR โต๊ะ</span><span>10 โต๊ะ</span></div>
+        <div class="receipt-line"><span><span class="chk">✓</span> หน้าจอครัวเรียลไทม์</span><span>มี</span></div>
+        <div class="receipt-line"><span><span class="chk">✓</span> ระบบแคชเชียร์คิดเงิน</span><span>มี</span></div>
+        <div class="receipt-line"><span><span class="chk">✓</span> รายงานยอดขาย</span><span>มี</span></div>
+        <div class="receipt-line"><span><span class="chk">✓</span> QR PromptPay รับเงิน</span><span>มี</span></div>
+        <div class="receipt-total"><span>ยอดรวม</span><span>฿2,590</span></div>
+        <a href="#contact" class="receipt-cta">เลือกแพ็กเกจนี้</a>
+        <div class="receipt-foot">ขอบคุณที่ให้ The Table Studio ดูแลร้านของคุณ</div>
+      </div>
+
+      <div class="receipt featured">
+        <div class="receipt-badge">แนะนำ</div>
+        <h3 class="store">UNLIMITED</h3>
+        <div class="tagline">เหมาะกับร้านขนาดกลาง–ใหญ่ / เมนูเยอะ</div>
+        <hr>
+        <div class="receipt-price">
+          <div class="amt">฿3,590</div>
+          <div class="per">จ่ายครั้งเดียว</div>
+        </div>
+        <hr>
+        <div class="receipt-line"><span><span class="chk">✓</span> เมนูอาหาร/เครื่องดื่ม</span><span>ไม่จำกัด</span></div>
+        <div class="receipt-line"><span><span class="chk">✓</span> สร้าง QR โต๊ะ</span><span>ไม่จำกัด</span></div>
+        <div class="receipt-line"><span><span class="chk">✓</span> หน้าจอครัวเรียลไทม์</span><span>มี</span></div>
+        <div class="receipt-line"><span><span class="chk">✓</span> ระบบแคชเชียร์คิดเงิน</span><span>มี</span></div>
+        <div class="receipt-line"><span><span class="chk">✓</span> รายงานยอดขาย</span><span>มี</span></div>
+        <div class="receipt-line"><span><span class="chk">✓</span> QR PromptPay รับเงิน</span><span>มี</span></div>
+        <div class="receipt-total"><span>ยอดรวม</span><span>฿3,590</span></div>
+        <a href="#contact" class="receipt-cta">เลือกแพ็กเกจนี้</a>
+        <div class="receipt-foot">ขยายร้านกี่สาขา กี่โต๊ะ ก็ไม่ต้องกังวลเรื่องจำนวน</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="section" id="contact">
+  <div class="wrap">
+    <div class="cta-band">
+      <h2>พร้อมให้ร้านของคุณสั่งอาหารง่ายขึ้นหรือยัง?</h2>
+      <p>ตั้งค่าเมนู โต๊ะ และ QR ให้พร้อมใช้งานได้ภายในวันเดียว ทีมงานช่วยตั้งค่าให้ในการซื้อครั้งแรก</p>
+      <div class="cta-row">
+        <a href="#" class="btn-primary">สั่งซื้อแพ็กเกจตอนนี้</a>
+        <a href="#" class="btn-ghost">ทักแชทสอบถามเพิ่มเติม</a>
+      </div>
+      <div class="contact-note">ติดต่อสอบถาม/สั่งซื้อ: <b>091-7787195</b></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  © 2026 The Table Studio — ระบบจัดการร้านอาหารด้วย QR
+</footer>
+
+</body>
+</html>
